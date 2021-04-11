@@ -1,8 +1,12 @@
 const { Rental, validate } = require("../models/rental");
 const { Movie } = require("../models/movie");
 const { Customer } = require("../models/customer");
+const mongoose = require("mongoose");
+const Fawn = require("fawn");
 const express = require("express");
 const router = express.Router();
+
+Fawn.init(mongoose);
 
 router.get("/", async (req, res) => {
   const rental = await Rental.find().sort("-dateOut");
@@ -42,10 +46,25 @@ router.post("/", async (req, res) => {
     },
   });
 
-  rental = await rental.save();
-
-  movie.numberInStock--;
-  movie.save();
+  // must update rental and movie documents so use Fawn to implement two phase commit transaction
+  //    this will avoid invalid persistence by rolling back if any one of the save operations fails
+  // rental = await rental.save();
+  // movie.numberInStock--;
+  // movie.save();
+  try {
+    new Fawn.Task()
+      .save("rentals", rental)
+      .update(
+        "movies",
+        { _id: movie._id },
+        {
+          $inc: { numberInStock: -1 },
+        }
+      )
+      .run();
+  } catch (ex) {
+    return res.status(500).send("Something failed");
+  }
 
   return res.send(rental);
 });
