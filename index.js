@@ -1,6 +1,5 @@
 const Joi = require("Joi");
 Joi.objectId = require("joi-objectid")(Joi);
-const home = require("./routes/home");
 const genres = require("./routes/genres");
 const customers = require("./routes/customers");
 const movies = require("./routes/movies");
@@ -20,7 +19,6 @@ mongoose
   .catch((err) => console.error("Could not connect to MongoDB..."));
 
 app.use(express.json());
-app.use("/", home);
 app.use("/api/genres", genres);
 app.use("/api/customers", customers);
 app.use("/api/movies", movies);
