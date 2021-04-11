@@ -1,3 +1,5 @@
+const Joi = require("Joi");
+Joi.objectId = require("joi-objectid")(Joi);
 const home = require("./routes/home");
 const genres = require("./routes/genres");
 const customers = require("./routes/customers");
