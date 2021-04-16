@@ -11,20 +11,28 @@ const movies = require("./routes/movies");
 const rentals = require("./routes/rentals");
 const users = require("./routes/users");
 const auth = require("./routes/auth");
+const mongoose = require("mongoose");
+const express = require("express");
+const app = express();
 
-winston.add(winston.transports.File, { filename: "logfile.log" });
+process.on("unhandledRejection", (ex) => {
+  throw ex;
+});
 
-winston.add(winston.transports.MongoDB, { db: "mongodb://localhost/vidly" });
+winston.add(winston.transports.File, {
+  filename: "logfile.log",
+  handleExceptions: true,
+});
+
+winston.add(winston.transports.MongoDB, {
+  db: "mongodb://localhost/vidly",
+  handleExceptions: true,
+});
 
 if (!config.get("jwtPrivateKey")) {
   console.error("FATAL ERROR: jwtPrivateKey is not defined");
   process.exit(1);
 }
-
-const mongoose = require("mongoose");
-
-const express = require("express");
-const app = express();
 
 mongoose
   .connect("mongodb://localhost/vidly", {
